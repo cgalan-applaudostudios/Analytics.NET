@@ -205,13 +205,14 @@ workflows:
       - test_35
       - test_45
       - test_e2e
-      - build_di
-      - test_di:
-          requires:
-            - build_di
-      - pack_di:
-          requires:
-            - test_di
+      # uncomment when Analytics.Net with IAnalyticsClient is released in Nuget
+      # - build_di
+      # - test_di:
+      #     requires:
+      #       - build_di
+      # - pack_di:
+      #     requires:
+      #       - test_di
   scheduled_e2e_test:
     triggers:
       - schedule:
