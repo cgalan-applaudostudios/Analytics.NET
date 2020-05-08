@@ -159,6 +159,38 @@ jobs:
       - run: dotnet build Test.E2E/Test.E2E.csproj
       - run: cd Test.E2E/ && ./e2e.sh
       - run: *notify_on_fail
+  build_di:
+    working_directory: /di
+    docker:  
+      - image: microsoft/dotnet:2.2-sdk
+    environment:
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+      DOTNET_CLI_TELEMETRY_OUTPUT: 1
+    steps:
+      - checkout
+      - run: dotnet build -c Release DI/Analytics.Extensions.Microsoft.DependencyInjection/Analytics.Extensions.Microsoft.DependencyInjection.csproj
+  test_di:
+    working_directory: /test_di
+    docker:
+      - image: microsoft/dotnet:3.1-sdk
+    environment:
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+      DOTNET_CLI_TELEMETRY_OUTPUT: 1
+    steps:
+      - checkout
+      - run: dotnet test DI/Analytics.Extensions.Microsoft.DependencyInjection.Test/Analytics.Extensions.Microsoft.DependencyInjection.Test.csproj
+  pack_di:
+    working_directory: /pack_di
+    docker:  
+      - image: microsoft/dotnet:2.2-sdk
+    environment:
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+      DOTNET_CLI_TELEMETRY_OUTPUT: 1
+    steps:
+      - checkout
+      - run: dotnet build pack -o /packages -c Release DI/Analytics.Extensions.Microsoft.DependencyInjection/Analytics.Extensions.Microsoft.DependencyInjection.csproj
+      - store_artifacts:
+          path: /packages/
 
 workflows:
   version: 2
@@ -173,6 +205,13 @@ workflows:
       - test_35
       - test_45
       - test_e2e
+      - build_di
+      - test_di:
+          requires:
+            - build_di
+      - pack_di:
+          requires:
+            - test_di
   scheduled_e2e_test:
     triggers:
       - schedule:
